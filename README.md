@@ -4,7 +4,9 @@ Goscript: Runtime execution of Go code.
 
 ## Usage
 
-The script string must define a `goscript` function that takes in zero or more
+A Goscript is a string that contains valid Go code that can be executed by Goscript.
+
+The script string defines a `goscript` function that takes in zero or more
 arguments, and returns two; a value and an error.
 
 You then start the script like this:
