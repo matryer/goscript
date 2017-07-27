@@ -33,7 +33,7 @@ log.Println(greeting)
 ## Rules
 
 * Every script must provide a `goscript` entry function
-* Imports must be included outside the `goscript` function if required
+* Imports must be included above the `goscript` function if required
 * Any special types being used as input or output require `gob.Register` in the script and the calling code
 * The `goscript` function must return two values and the second type must be `error`
 * Only execute trusted code; there are no limits to what scripts can do
