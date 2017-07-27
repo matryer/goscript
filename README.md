@@ -11,9 +11,15 @@ You then start the script like this:
 
 ```go
 script := goscript.New(`
+	
+	import (
+		"strings"
+	)
+	
 	func goscript(name string) (string, error) {
-		return "Hello " + name, nil
+		return "Hello " + strings.ToUpper(name), nil
 	}
+	
 `)
 defer script.Close()
 ```
@@ -27,7 +33,7 @@ if err != nil {
 }
 log.Println(greeting)
 
-// prints: Hello Mat
+// prints: Hello MAT
 ```
 
 ## Rules
