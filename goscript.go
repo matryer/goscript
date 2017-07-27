@@ -29,9 +29,10 @@ func (e Error) Error() string {
 
 // Script represents a script.
 type Script struct {
-	err        error
-	scriptFile string
-	cmd        *exec.Cmd
+	err         error
+	scriptFile  string
+	scriptLines int
+	cmd         *exec.Cmd
 
 	executeLock sync.Mutex
 
@@ -52,7 +53,7 @@ func New(script string) *Script {
 		return s
 	}
 	var args []arg
-	if args, s.err = processScript(script); s.err != nil {
+	if s.scriptLines, args, s.err = processScript(script); s.err != nil {
 		return s
 	}
 	if s.scriptFile, s.err = createScriptFile(script, args); s.err != nil {
@@ -76,7 +77,7 @@ func New(script string) *Script {
 	var state string
 	if err := s.stdoutdecoder.Decode(&state); err != nil {
 		b, _ := ioutil.ReadAll(s.stderr)
-		output := processOutput(b)
+		output := processOutput(s.scriptLines, b)
 		if s.err = s.cmd.Wait(); s.err != nil {
 			s.err = Error{Err: s.err, Stderr: output}
 		}
@@ -111,17 +112,19 @@ func (s *Script) Execute(args ...interface{}) (interface{}, error) {
 	return res.Value, res.Error
 }
 
-func processScript(script string) ([]arg, error) {
+func processScript(script string) (int, []arg, error) {
+	n := 0
 	s := bufio.NewScanner(strings.NewReader(script))
 	for s.Scan() {
+		n++
 		trimline := strings.TrimSpace(s.Text())
 		if !strings.HasPrefix(trimline, "func goscript(") {
 			continue
 		}
 		args := extractArguments(trimline)
-		return args, nil
+		return n, args, nil
 	}
-	return nil, errors.New("missing func goscript")
+	return 0, nil, errors.New("missing func goscript")
 }
 
 type arg struct {
@@ -251,7 +254,7 @@ func (s *Script) Close() error {
 	return nil
 }
 
-func processOutput(out []byte) string {
+func processOutput(scriptLines int, out []byte) string {
 	var lines []string
 	s := bufio.NewScanner(bytes.NewReader(out))
 	for s.Scan() {
@@ -260,12 +263,18 @@ func processOutput(out []byte) string {
 		if trimline == "# command-line-arguments" {
 			continue
 		}
-		if strings.Contains(line, "/goscript.go:") {
+		if strings.Contains(line, "goscript.go:") {
 			// error lines should be tweaked
 			segs := strings.Split(line, ":")
 			segs[0] = "goscript"
 			n, err := strconv.Atoi(segs[1])
 			if err == nil {
+				scriptlineN := n - scriptStartLine
+				if scriptlineN > scriptLines {
+					// skip errors on lines outside of the users
+					// script file.
+					continue
+				}
 				segs[1] = strconv.Itoa(n - scriptStartLine)
 			}
 			line = strings.Join(segs, ":")

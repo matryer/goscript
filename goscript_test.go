@@ -25,7 +25,7 @@ var tests = []struct {
 	Goscript string
 	InArgs   []interface{}
 	OutValue interface{}
-	OutErr   error
+	OutErr   string
 }{
 	{
 		Goscript: `
@@ -34,7 +34,6 @@ func goscript() (string, error) {
 }
 `,
 		OutValue: "Hello",
-		OutErr:   nil,
 	},
 	{
 		Goscript: `
@@ -45,7 +44,6 @@ func goscript(salutation, name string) (string, error) {
 `,
 		InArgs:   []interface{}{"Hello", "Mat"},
 		OutValue: "Hello Mat",
-		OutErr:   nil,
 	},
 	{
 		Goscript: `
@@ -57,7 +55,6 @@ func goscript(items ...string) (string, error) {
 `,
 		InArgs:   []interface{}{"one", "two", "three"},
 		OutValue: "one,two,three",
-		OutErr:   nil,
 	},
 	{
 		Goscript: `
@@ -69,7 +66,17 @@ func goscript(separator string, items ...string) (string, error) {
 `,
 		InArgs:   []interface{}{"|", "one", "two", "three"},
 		OutValue: "one|two|three",
-		OutErr:   nil,
+	},
+	{
+		Goscript: `
+import "strings"
+
+func goscript(separator string, items) (string, error) {
+	return strings.Join(items, separator), nil
+}
+`,
+		InArgs: []interface{}{"|", "one", "two", "three"},
+		OutErr: "goscript:4: syntax error: mixed named and unnamed function parameters",
 	},
 }
 
@@ -82,8 +89,16 @@ func TestGoscriptTests(t *testing.T) {
 			script := New(test.Goscript)
 			defer script.Close()
 			val, err := script.Execute(test.InArgs...)
-			is.Equal(err, test.OutErr)
-			is.Equal(val, test.OutValue)
+			if err != nil {
+				is.Equal(err.Error(), test.OutErr)
+			} else {
+				if test.OutErr != "" {
+					is.Fail() // OutErr specified but error was nil
+				}
+			}
+			if test.OutValue != nil {
+				is.Equal(val, test.OutValue)
+			}
 		})
 	}
 }
