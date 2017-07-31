@@ -1,6 +1,6 @@
-# goscript
+![Goscript logo by Rob Baines](goscript-logo-small.png)
 
-![](goscript-logo-small.png)
+# goscript
 
 Goscript: Runtime execution of Go code.
 
