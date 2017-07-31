@@ -1,5 +1,7 @@
 # goscript
 
+![](goscript-logo-small.png)
+
 Goscript: Runtime execution of Go code.
 
 ## Usage
@@ -52,3 +54,5 @@ log.Println(greeting)
 * The script program communicates with the host program via stdin/stdout
 * Values are encoded/decoded via the `encoding/gob` package
 * The script program stays running until `Close` is called
+
+Logo by [Rob Baines](https://twitter.com/telecoda), licensed under a [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/).
