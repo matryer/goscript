@@ -55,4 +55,6 @@ log.Println(greeting)
 * Values are encoded/decoded via the `encoding/gob` package
 * The script program stays running until `Close` is called
 
+---
+
 Logo by [Rob Baines](https://twitter.com/telecoda), licensed under a [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/).
