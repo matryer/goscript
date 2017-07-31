@@ -48,6 +48,17 @@ log.Println(greeting)
 * The `goscript` function must return two values and the second type must be `error`
 * Only execute trusted code; there are no limits to what scripts can do
 
+## Security
+
+Running any Go code unsupervised represents a pretty giant security concern for obvious reasons, but that doesn't
+nncessarily spell the end for using Goscript in your projects.
+
+One option is to wrap Goscript and provide the `goscript` func signature youself, and allow users to only provide the
+body. This would also prevent them from controlling the imports too. And with some simple string checking, you'd be able
+to protect from injection attacks.
+
+For an example of how this might work, see the `example/rename` tool.
+
 ## How it works
 
 * Goscript generates a mini Go program and executes it with `go run`
